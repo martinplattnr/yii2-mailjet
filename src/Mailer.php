@@ -15,8 +15,8 @@
 namespace sweelix\mailjet;
 
 
-use Mailjet\Client;
 use Mailjet\Resources;
+use Yii;
 use yii\base\InvalidConfigException;
 use yii\helpers\ArrayHelper;
 use yii\mail\BaseMailer;
@@ -31,38 +31,14 @@ use yii\mail\BaseMailer;
  * @link http://www.sweelix.net
  * @package sweelix\mailjet
  * @since XXX
+ * @method Message compose()
  */
 class Mailer extends BaseMailer
 {
     /**
-     * @var string
+     * @var string the application component ID of the mailjet api client.
      */
-    public $apiKey;
-
-    /**
-     * @var string
-     */
-    public $apiSecret;
-
-    /**
-     * @var boolean
-     */
-    public $enable = true;
-
-    /**
-     * @var string
-     */
-    public $apiVersion = 'v3.1';
-
-    /**
-     * @var string
-     */
-    public $apiUrl;
-
-    /**
-     * @var bool
-     */
-    public $secured = true;
+    public $mailjetApiClient;
 
     /**
      * @var \Mailjet\Response
@@ -104,28 +80,11 @@ class Mailer extends BaseMailer
         }
 
         try {
-            if ($this->apiKey === null) {
-                throw new InvalidConfigException('API Key is missing');
-            }
-            if ($this->apiSecret === null) {
-                throw new InvalidConfigException('API Secret is missing');
-            }
-            $settings = [
-                'secured' => $this->secured,
-                'version' => $this->apiVersion,
-            ];
-
-            if ($this->apiUrl !== null) {
-                $settings['url'] = $this->apiUrl;
-            }
-
-            $client = new Client($this->apiKey, $this->apiSecret, $this->enable, $settings);
-
-            $this->apiResponse = $client->post(Resources::$Email, [
-                'body' => [
-                    'Messages' => $mailJetMessages,
-                ]
-            ]);
+            $this->apiResponse = Yii::$app->get($this->mailjetApiClient)->post(
+                Resources::$Email,
+                ['body' => ['Messages' => $mailJetMessages]],
+                ['version' => 'v3.1'] // use v3.1 to send many, as opposed to v3 for other API calls (Mailjet issue)
+            );
 
             //TODO: handle error codes and log stuff
 

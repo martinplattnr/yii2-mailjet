@@ -378,7 +378,7 @@ class Message extends BaseMessage
      */
     public function setTemplateId($templateId)
     {
-        $this->templateId = $templateId;
+        $this->templateId = (int) $templateId;
         return $this;
     }
 
