@@ -620,9 +620,15 @@ class Message extends BaseMessage
         }
 
         $bcc = $this->getBcc();
-        if (empty($cc) === false) {
+        if (empty($bcc) === false) {
             $bcc = Message::convertEmails($bcc);
             $mailJetMessage['Bcc'] = $bcc;
+        }
+
+        $replyTo = $this->getReplyTo();
+        if (empty($replyTo) === false) {
+            $replyTo = Message::convertEmails($replyTo);
+            $mailJetMessage['ReplyTo'] = $replyTo[0];
         }
 
         $attachments = $this->getAttachments();
